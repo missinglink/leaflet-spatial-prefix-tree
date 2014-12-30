@@ -57,7 +57,8 @@ var hashAdapter = {
   layers: function( currentHash, zoom ){
     var layers = {};
     layers[ '' ] = true;
-    for( var x=1; x<6; x++ ){
+    for( var x=1; x<7; x++ ){
+      // console.log( zoom, x*3, ((x+2)*3) );
       if( zoom >= (x*3) && zoom < ((x+2)*3) ){
         layers[ '' + currentHash.substr( 0, x ) ] = true;
       }
