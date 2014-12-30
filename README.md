@@ -11,8 +11,8 @@ You can toggle the algorithm with the button located at the top-right.
 
 #### Quadtree
 
-![quadtree](https://raw.githubusercontent.com/mapzen/leaflet-spacial-prefix-tree/master/img/quadtree.gif)
+![quadtree](https://raw.githubusercontent.com/mapzen/leaflet-spacial-prefix-tree/master/img/quadtree.png)
 
 #### Geohash
 
-![geohash](https://raw.githubusercontent.com/mapzen/leaflet-spacial-prefix-tree/master/img/geohash.gif)
+![geohash](https://raw.githubusercontent.com/mapzen/leaflet-spacial-prefix-tree/master/img/geohash.png)
