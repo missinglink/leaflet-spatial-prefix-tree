@@ -5,6 +5,6 @@ Leaflet plugin for visualizing spacial prefix trees, quadtree and geohash
 
 http://mapzen.github.io/leaflet-spacial-prefix-tree/
 
-#### Chaning Algorithms
+#### Changing Algorithms
 
 You can toggle the algorithm with the button located at the top-right.
