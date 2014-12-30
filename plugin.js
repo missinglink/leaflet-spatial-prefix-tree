@@ -91,16 +91,23 @@ var changeHashFunction = function( hashText ){
   updateLayer();
 };
 
+var prevHash = 'foo';
 function updateLayer(){
+
+  prevHash = currentHash;
+
   // update current hash
   currentHash = generateCurrentHash();
-  
-  var zoom = map.getZoom();
-  layerGroup.clearLayers();
 
-  var layers = adapter.layers( currentHash, zoom );
-  for( var attr in layers ){
-    drawLayer( attr, layers[attr] );
+  // performance tweak
+  if( prevHash != currentHash ){
+    var zoom = map.getZoom();
+    layerGroup.clearLayers();
+
+    var layers = adapter.layers( currentHash, zoom );
+    for( var attr in layers ){
+      drawLayer( attr, layers[attr] );
+    }
   }
 }
 
