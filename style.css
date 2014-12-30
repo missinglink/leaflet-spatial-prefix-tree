@@ -1,0 +1,25 @@
+
+.leaflet-label,
+.leaflet-label:before {
+  border:none;
+  font-size: 10px;
+}
+
+.my-label {
+  color: white;
+  background-color: rgba( 255, 0, 0, 0.5 );
+}
+
+.my-label2 {
+  font-size: 30px;
+  color: rgba( 255, 0, 0, 0.5 );
+  background-color: transparent;
+}
+
+.toggle-button {
+  font-size: 20px;
+  font-family: sans-serif;
+  font-weight: bold;
+  text-transform: uppercase;
+  padding: 10px 20px;
+}
