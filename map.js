@@ -21,12 +21,8 @@ window.toggleButton = new L.Control.Button( 'geohash', {
 });
 
 window.toggleButton.addTo(map);
-// button._container.innerHTML = 'geohash';
-
-// console.log( button._container.innerHTML = 'geohash' );
 
 window.toggleButton.on('click', function () {
-  console.log( 'click', 'was', window.toggleButton._container.innerHTML );
 
   changeHashFunction( window.toggleButton._container.innerHTML );
 
@@ -38,11 +34,3 @@ window.toggleButton.on('click', function () {
 
   console.log( 'click', 'now', window.toggleButton._container.innerHTML );
 });
-
-// map.addLayer(osm);
-
-// var circle = L.circle([51.508, -0.11], 500, {
-//   color: 'red',
-//   fillColor: '#f03',
-//   fillOpacity: 0.5
-// }).addTo(map);
