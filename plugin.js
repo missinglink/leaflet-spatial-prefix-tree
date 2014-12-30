@@ -29,16 +29,17 @@ map.addLayer( layerGroup );
 var quadAdapter = {
   range: ['0','1','2','3'],
   encode: function( centroid, precision ){
-    return quadtree.encode( centroid, precision );
+    return '' + quadtree.encode( centroid, precision );
   },
   bbox: function( str ){
     return quadtree.bbox( '' + str );
   },
   layers: function( currentHash, zoom ){
     var layers = {};
-    if( zoom > 3 ) layers[ currentHash.substr( 0, zoom -3 ) ] = false;
-    if( zoom > 2 ) layers[ currentHash.substr( 0, zoom -2 ) ] = false;
-    if( zoom > 1 ) layers[ currentHash.substr( 0, zoom -1 ) ] = false;
+    if( zoom > 4 ) layers[ currentHash.substr( 0, zoom -4 ) ] = true;
+    if( zoom > 3 ) layers[ currentHash.substr( 0, zoom -3 ) ] = true;
+    if( zoom > 2 ) layers[ currentHash.substr( 0, zoom -2 ) ] = true;
+    if( zoom > 1 ) layers[ currentHash.substr( 0, zoom -1 ) ] = true;
     layers[ currentHash.substr( 0, zoom ) ] = true;
     return layers;
   }
@@ -47,7 +48,7 @@ var quadAdapter = {
 var hashAdapter = {
   range: Object.keys( BASE32_CODES_DICT ),
   encode: function( centroid, precision ){
-    return geohash.encode( centroid.lat, centroid.lng, precision );
+    return '' + geohash.encode( centroid.lat, centroid.lng, precision );
   },
   bbox: function( str ){
     var box = geohash.decode_bbox( '' + str );
@@ -55,7 +56,12 @@ var hashAdapter = {
   },
   layers: function( currentHash, zoom ){
     var layers = {};
-    layers[ currentHash.substr( 0, Math.floor( zoom / 3 ) ) ] = true;
+    layers[ '' ] = true;
+    for( var x=1; x<6; x++ ){
+      if( zoom >= (x*3) && zoom < ((x+2)*3) ){
+        layers[ '' + currentHash.substr( 0, x ) ] = true;
+      }
+    }
     return layers;
   }
 };
@@ -64,8 +70,18 @@ var currentHash;
 var adapter = quadAdapter;
 // var adapter = hashAdapter;
 
+var mousePositionEvent = null;
+
 var generateCurrentHash = function(){
-  return adapter.encode( map.getCenter(), 30 );
+
+  var center = map.getCenter();
+
+  if( mousePositionEvent ){
+    center = mousePositionEvent.latlng;
+    // console.log( center );
+  }
+
+  return adapter.encode( center, 20 );
 };
 
 var changeHashFunction = function( hashText ){
@@ -135,3 +151,8 @@ map.on('moveend', updateLayer);
 // init
 changeHashFunction( 'quadtree' );
 // updateLayer();
+
+map.on('mousemove', function( e ){
+  mousePositionEvent = e;
+  updateLayer();
+});
