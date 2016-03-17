@@ -77,9 +77,7 @@ var slippyAdapter = {
   bbox: quadAdapter.bbox,
   layers: quadAdapter.layers,
   labels: function( hash ){
-
     var tile = QuadToSlippy( hash );
-
     return {
       long: [ tile.z, tile.x, tile.y ].join('/'),
       short: ''
@@ -137,15 +135,15 @@ function SlippyToQuad(x, y, z) {
   return quadKey.join('');
 }
 
-function long2tile(lon,zoom) { return (Math.floor((lon+180)/360*Math.pow(2,zoom))); }
-function lat2tile(lat,zoom)  { return (Math.floor((1-Math.log(Math.tan(lat*Math.PI/180) + 1/Math.cos(lat*Math.PI/180))/Math.PI)/2 *Math.pow(2,zoom))); }
-function tile2long(x,z) {
- return (x/Math.pow(2,z)*360-180);
-}
-function tile2lat(y,z) {
- var n=Math.PI-2*Math.PI*y/Math.pow(2,z);
- return (180/Math.PI*Math.atan(0.5*(Math.exp(n)-Math.exp(-n))));
-}
+// function long2tile(lon,zoom) { return (Math.floor((lon+180)/360*Math.pow(2,zoom))); }
+// function lat2tile(lat,zoom)  { return (Math.floor((1-Math.log(Math.tan(lat*Math.PI/180) + 1/Math.cos(lat*Math.PI/180))/Math.PI)/2 *Math.pow(2,zoom))); }
+// function tile2long(x,z) {
+//  return (x/Math.pow(2,z)*360-180);
+// }
+// function tile2lat(y,z) {
+//  var n=Math.PI-2*Math.PI*y/Math.pow(2,z);
+//  return (180/Math.PI*Math.atan(0.5*(Math.exp(n)-Math.exp(-n))));
+// }
 
 var hashAdapter = {
   range: Object.keys( BASE32_CODES_DICT ),
@@ -192,11 +190,12 @@ var generateCurrentHash = function( precision ){
   return adapter.encode( center, precision );
 };
 
+var prevHash = 'NOTAHASH';
 var changeHashFunction = function( algorithm ){
   if( algorithm == 'geohash' ) adapter = hashAdapter;
   else if( algorithm == 'slippy' ) adapter = slippyAdapter;
   else adapter = quadAdapter;
-  // currentHash = generateCurrentHash();
+  prevHash = 'NOTAHASH'; // force hash to regenerate
   updateLayer();
 };
 
@@ -207,7 +206,6 @@ var zoomToHashChars = function( zoom ){
   return 1 + Math.floor( zoom / 3 );
 };
 
-var prevHash = 'foo';
 function updateLayer(){
 
   var zoom = map.getZoom();
