@@ -11,26 +11,15 @@ L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}.png', {
   maxZoom: 18
 }).addTo(map);
 
+L.control.geocoder('search-fljxAAA').addTo(map);
+
 // start the map in South-East England
 map.setView( new L.LatLng( 51.5072, 0.1275 ), 0 );
 
-
-window.toggleButton = new L.Control.Button( 'geohash', {
-  position: 'topright',
-  className: 'toggle-button'
-});
-
-window.toggleButton.addTo(map);
-
-window.toggleButton.on('click', function () {
-
-  changeHashFunction( window.toggleButton._container.innerHTML );
-
-  if( window.toggleButton._container.innerHTML == 'quadtree' ){
-    window.toggleButton._container.innerHTML = 'geohash';
-  } else {
-    window.toggleButton._container.innerHTML = 'quadtree';
-  }
-
-  console.log( 'click', 'now', window.toggleButton._container.innerHTML );
+$(document).ready(function() {
+  $('#buttons button').on('click', function(event) {
+    $('#buttons button').removeClass('active');
+    $(event.target).addClass('active');
+    changeHashFunction( event.target.id );
+  });
 });

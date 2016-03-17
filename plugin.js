@@ -36,14 +36,56 @@ var quadAdapter = {
   },
   layers: function( currentHash, zoom ){
     var layers = {};
-    if( zoom > 4 ) layers[ currentHash.substr( 0, zoom -4 ) ] = true;
-    if( zoom > 3 ) layers[ currentHash.substr( 0, zoom -3 ) ] = true;
+    // if( zoom > 4 ) layers[ currentHash.substr( 0, zoom -4 ) ] = true;
+    // if( zoom > 3 ) layers[ currentHash.substr( 0, zoom -3 ) ] = true;
     if( zoom > 2 ) layers[ currentHash.substr( 0, zoom -2 ) ] = true;
     if( zoom > 1 ) layers[ currentHash.substr( 0, zoom -1 ) ] = true;
     layers[ currentHash.substr( 0, zoom ) ] = true;
     return layers;
+  },
+  labels: function( hash ){
+    return {
+      long: hash,
+      short: hash.substr(-1, 1)
+    };
   }
 };
+
+var slippyAdapter = {
+  range: quadAdapter.range,
+  encode: quadAdapter.encode,
+  bbox: quadAdapter.bbox,
+  layers: quadAdapter.layers,
+  labels: function( hash ){
+
+    var tile = QuadToSlippy( hash );
+
+    return {
+      long: [ tile.z, tile.x, tile.y ].join('/'),
+      short: ''
+    };
+  }
+};
+
+function QuadToSlippy(quad) {
+  var x = 0;
+  var y = 0;
+  var z = 0;
+	quad.split("").forEach(function(char){
+    x *= 2;
+		y *= 2;
+		z++;
+
+		if( char == "1" || char == "3" ){
+			x++;
+		}
+
+		if( char == "2" || char == "3" ){
+			y++;
+		}
+  });
+	return { x:x, y:y, z:z };
+}
 
 var hashAdapter = {
   range: Object.keys( BASE32_CODES_DICT ),
@@ -58,12 +100,17 @@ var hashAdapter = {
     var layers = {};
     layers[ '' ] = true;
     for( var x=1; x<7; x++ ){
-      // console.log( zoom, x*3, ((x+2)*3) );
       if( zoom >= (x*3) && zoom < ((x+2)*3) ){
         layers[ '' + currentHash.substr( 0, x ) ] = true;
       }
     }
     return layers;
+  },
+  labels: function( hash ){
+    return {
+      long: hash,
+      short: hash.substr(-1, 1)
+    };
   }
 };
 
@@ -73,7 +120,7 @@ var adapter = quadAdapter;
 
 var mousePositionEvent = null;
 
-var generateCurrentHash = function(){
+var generateCurrentHash = function( precision ){
 
   var center = map.getCenter();
 
@@ -82,27 +129,47 @@ var generateCurrentHash = function(){
     // console.log( center );
   }
 
-  return adapter.encode( center, 20 );
+  return adapter.encode( center, precision );
 };
 
-var changeHashFunction = function( hashText ){
-  if( hashText == 'geohash' ) adapter = hashAdapter;
+var changeHashFunction = function( algorithm ){
+  if( algorithm == 'geohash' ) adapter = hashAdapter;
+  else if( algorithm == 'slippy' ) adapter = slippyAdapter;
   else adapter = quadAdapter;
-  currentHash = generateCurrentHash();
+  // currentHash = generateCurrentHash();
   updateLayer();
+};
+
+// 0 : 1 char
+// 3 : 2 chars
+// 6 : 3 chars
+var zoomToHashChars = function( zoom ){
+  return 1 + Math.floor( zoom / 3 );
 };
 
 var prevHash = 'foo';
 function updateLayer(){
 
-  prevHash = currentHash;
+  var zoom = map.getZoom();
+  var hashLength = zoom+1;
 
   // update current hash
-  currentHash = generateCurrentHash();
+  currentHash = generateCurrentHash( hashLength );
+
+  if( adapter === hashAdapter ){
+    hashLength = zoomToHashChars( zoom );
+  }
+
+  var hashPrefix = currentHash.substr( 0, hashLength );
+
+  // console.log( 'zoom', zoom );
+  // console.log( 'prevHash', prevHash );
+  // console.log( 'hashPrefix', hashPrefix );
 
   // performance tweak
-  if( prevHash != currentHash ){
-    var zoom = map.getZoom();
+  // @todo: not that performant?
+  if( prevHash != hashPrefix ){
+  // console.log( 'zoom', zoom );
     layerGroup.clearLayers();
 
     var layers = adapter.layers( currentHash, zoom );
@@ -110,25 +177,32 @@ function updateLayer(){
       drawLayer( attr, layers[attr] );
     }
   }
+
+  prevHash = hashPrefix;
 }
 
-function drawRect( bounds, labelText, showDigit ){
-  
+function drawRect( bounds, hash, showDigit ){
+
+  // console.log('draw');
+
   // http://leafletjs.com/reference.html#path-options
   var poly = L.rectangle( bounds, rectStyle );
   poly.addTo( layerGroup );
 
+  // generate labels
+  var labels = adapter.labels( hash );
+
   // full (long) hash marker
-  if( labelText.length > 1 ){
+  if( labels.long.length > 1 ){
     var marker = new L.marker( poly.getBounds().getNorthWest(), { opacity: 0.0001 });
-    marker.bindLabel( labelText, labelConfig );
+    marker.bindLabel( labels.long, labelConfig );
     marker.addTo( layerGroup );
   }
 
   // large single digit marker
   if( showDigit ){
     var marker2 = new L.marker( poly.getBounds().getCenter(), { opacity: 0.0001 });
-    marker2.bindLabel( labelText.substr( -1 , 1 ), labelConfig2 );
+    marker2.bindLabel( labels.short, labelConfig2 );
     marker2.addTo( layerGroup );
   }
 }

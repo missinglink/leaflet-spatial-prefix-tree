@@ -6,22 +6,37 @@
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width">
 
-        <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+        <script src="https://code.jquery.com/jquery-1.12.1.min.js" integrity="sha256-I1nTg78tSrZev3kjvfdM5A5Ak/blglGzlaZANLPDl3I=" crossorigin="anonymous"></script>
+
+        <!-- Load Leaflet from CDN -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/leaflet.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/leaflet.js"></script>
+
+        <!-- Load geocoding plugin after Leaflet -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-geocoder-mapzen/1.4.1/leaflet-geocoder-mapzen.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-geocoder-mapzen/1.4.1/leaflet-geocoder-mapzen.js"></script>
+
         <link rel="stylesheet" href="leaflet.label.css" />
         <link rel="stylesheet" href="style.css" />
+
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+        <!-- Latest compiled and minified JavaScript -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
     </head>
     <body>
 
         <div id="map" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></div>
 
-        <!--
-        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
-        <script>window.jQuery || document.write('<script src="/front/try/js/vendor/jquery-1.8.0.min.js"><\/script>')</script>
-        -->
+        <div id="buttons" class="btn-group" role="group">
+          <button id="quadtree" type="button" class="btn btn-default active">Quadtree</button>
+          <button id="geohash" type="button" class="btn btn-default">Geohash</button>
+          <button id="slippy" type="button" class="btn btn-default">Slippy Tile</button>
+        </div>
 
-        <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
         <script src="leaflet.label.js"></script>
-        <script src="L.Control.Button.js"></script>
         <script src="quadtree.js"></script>
         <script src="geohash.js"></script>
         <script src="map.js"></script>
