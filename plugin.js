@@ -29,10 +29,30 @@ map.addLayer( layerGroup );
 var quadAdapter = {
   range: ['0','1','2','3'],
   encode: function( centroid, precision ){
-    return '' + quadtree.encode( centroid, precision );
+    var zoom = precision-1;
+    var tile = getTileXYZ( centroid.lat, centroid.lng, zoom );
+    return SlippyToQuad( tile.x, tile.y, tile.z );
   },
-  bbox: function( str ){
-    return quadtree.bbox( '' + str );
+  bbox: function( hash ){
+
+    var tileSize = 256;
+    var tile = QuadToSlippy(hash);
+
+    // get NorthWest and SouthEast points
+    var nwTilePoint = new L.Point( tile.x * tileSize, tile.y * tileSize );
+    var seTilePoint = new L.Point( tile.x * tileSize, tile.y * tileSize );
+    seTilePoint.x += tileSize;
+    seTilePoint.y += tileSize;
+
+    var nwLatLon = map.unproject( nwTilePoint, tile.z );
+    var seLatLon = map.unproject( seTilePoint, tile.z );
+
+    return {
+      minlng: nwLatLon.lng,
+      minlat: seLatLon.lat,
+      maxlng: seLatLon.lng,
+      maxlat: nwLatLon.lat
+    };
   },
   layers: function( currentHash, zoom ){
     var layers = {};
@@ -67,6 +87,19 @@ var slippyAdapter = {
   }
 };
 
+/** Converts numeric degrees to radians */
+if (typeof(Number.prototype.toRad) === "undefined") {
+  Number.prototype.toRad = function() {
+    return this * Math.PI / 180;
+  };
+}
+
+function getTileXYZ(lat, lon, zoom) {
+  var xtile = parseInt(Math.floor( (lon + 180) / 360 * (1<<zoom) ));
+  var ytile = parseInt(Math.floor( (1 - Math.log(Math.tan(lat.toRad()) + 1 / Math.cos(lat.toRad())) / Math.PI) / 2 * (1<<zoom) ));
+  return { x:xtile, y:ytile, z:zoom };
+}
+
 function QuadToSlippy(quad) {
   var x = 0;
   var y = 0;
@@ -85,6 +118,33 @@ function QuadToSlippy(quad) {
 		}
   });
 	return { x:x, y:y, z:z };
+}
+
+function SlippyToQuad(x, y, z) {
+  var quadKey = [];
+  for (var i = z; i > 0; i--) {
+    var digit = '0';
+    var mask = 1 << (i - 1);
+    if( (x & mask) !== 0 ){
+      digit++;
+    }
+    if( (y & mask) !== 0 ){
+      digit++;
+      digit++;
+    }
+    quadKey.push(digit);
+  }
+  return quadKey.join('');
+}
+
+function long2tile(lon,zoom) { return (Math.floor((lon+180)/360*Math.pow(2,zoom))); }
+function lat2tile(lat,zoom)  { return (Math.floor((1-Math.log(Math.tan(lat*Math.PI/180) + 1/Math.cos(lat*Math.PI/180))/Math.PI)/2 *Math.pow(2,zoom))); }
+function tile2long(x,z) {
+ return (x/Math.pow(2,z)*360-180);
+}
+function tile2lat(y,z) {
+ var n=Math.PI-2*Math.PI*y/Math.pow(2,z);
+ return (180/Math.PI*Math.atan(0.5*(Math.exp(n)-Math.exp(-n))));
 }
 
 var hashAdapter = {
