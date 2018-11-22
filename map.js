@@ -11,10 +11,36 @@ L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}.png', {
   maxZoom: 18
 }).addTo(map);
 
-L.control.geocoder('search-fljxAAA').addTo(map);
+L.control.geocoder('search-fljxAAA').addTo(map); // BUG!
 
-// start the map in South-East England
-map.setView( new L.LatLng( 51.5072, 0.1275 ), 0 );
+
+var selectedByUrl = '';
+var hash = window.location.hash
+hash = hash.replace('#','');  // examples #6gzm/SP/MonteiroLobato ,  #6gycf/SP/SaoPaulo or #6gkz/PR/Curitiba
+if (hash) {
+	// check prefixes "geohash:" (default) or "quadtree:", and city 
+	var selectedByUrl = 'geohash';
+	var regex = /^((geohash|quadtree):)?(.+?)(\/(.+))?$/;
+	var fd = hash.match(regex);
+	selectedByUrl = (fd[2]!=undefined)? fd[2]: "geohash";
+	hash = fd[3]; // main!
+	var city = (fd[5]!=undefined)? fd[5]: "";
+	console.log("External parameters:",selectedByUrl,hash,city);
+	if (city) {
+		var urlCities = "https://raw.githubusercontent.com/datasets-br/city-codes/master/data/dump_osm/";
+		var gsl = new L.GeoJSON.AJAX(urlCities+city+".geojson");
+		gsl.addTo(map);
+		// there are a simple way to get gsl centroid? if no hash, use centroid or bbox center
+	}
+	// if selectedByUrl=='geohash'
+	var x = geohash.decode(hash);
+	var hl = (hash.length>9)? 9: hash.length;
+	map.setView( new L.LatLng( x.latitude, x.longitude ), (hl<5)? 1+2*hl: 8+hl );
+}  else {
+	map.setView( new L.LatLng( 51.5072, 0.1275 ), 5 ); // default = South-East England
+}
+
+///// for plugin.js
 
 $(document).ready(function() {
   $('#buttons button').on('click', function(event) {
@@ -23,3 +49,6 @@ $(document).ready(function() {
     changeHashFunction( event.target.id );
   });
 });
+
+
+
